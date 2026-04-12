@@ -32,7 +32,7 @@
     { "id": "n11", "string": 4, "fret": 5, "note": "A", "degree": 6, "role": "scale" }
   ],
   "playbackPatterns": {
-    "ascending":  ["n6", "n11", "n3", "n4", "n10", "n2", "n5", "n9", "n1", "n7", "n8"],
-    "descending": ["n8", "n7", "n1", "n9", "n5", "n2", "n10", "n4", "n3", "n11", "n6"]
+    "ascending":  ["n4", "n10", "n2", "n5", "n9", "n1", "n7", "n8"],
+    "descending": ["n8", "n7", "n1", "n9", "n5", "n2", "n10", "n4"]
   }
 }

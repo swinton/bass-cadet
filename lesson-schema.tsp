@@ -6,7 +6,10 @@ using TypeSpec.JsonSchema;
 
 alias InstrumentType = "bass";
 alias NoteRole = "root" | "scale" | "target" | "ghost";
+// Keys that can exist in PlaybackPatterns (stored sequences)
 alias PlaybackPatternName = "ascending" | "descending";
+// Valid player modes — includes "both" which is computed at runtime, not stored
+alias PlaybackMode = PlaybackPatternName | "both";
 
 model InstrumentConfig {
   type: InstrumentType;
@@ -24,7 +27,7 @@ model LayoutConfig {
 model DefaultConfig {
   tempo?: uint16 = 80;
   loop?: boolean = true;
-  playbackPattern?: PlaybackPatternName = "ascending";
+  playbackPattern?: PlaybackMode = "both";
 }
 
 model VisibleNote {
