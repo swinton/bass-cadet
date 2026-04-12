@@ -19,11 +19,21 @@ Then open `http://localhost:8080`.
 ## Features
 
 - SVG fretboard rendered from lesson data (no hardcoded coordinates)
-- Ascending and descending playback modes
-- Adjustable tempo (40–200 BPM)
+- Ascending, descending, and ascending+descending playback modes
+- Adjustable tempo (40–200 BPM) via slider or ↑/↓ keys
 - Looping playback
 - Active note highlighted in sequence
 - Roots and scale tones visually distinguished
+- Metronome click track (Web Audio lookahead scheduler)
+- Bass synth note audio per step, with mute toggle
+- Bookmarkable lessons via `?lesson=<id>` URL parameter
+
+## Lessons
+
+| Lesson | Direct link |
+|---|---|
+| C Major — Shape 1 | [?lesson=c-major-shape-1](https://swinton.github.io/bass-practitioner/?lesson=c-major-shape-1) |
+| C Major Pentatonic — Shape 1 | [?lesson=c-major-pentatonic-shape-1](https://swinton.github.io/bass-practitioner/?lesson=c-major-pentatonic-shape-1) |
 
 ## Project structure
 
@@ -32,15 +42,19 @@ bass/
   index.html              # App shell
   lesson-schema.tsp       # TypeSpec schema for lesson data
   data/
-    c-major-shape-1.json  # Lesson data
+    lessons.json          # Ordered lesson registry
+    c-major-shape-1.json
+    c-major-pentatonic-shape-1.json
   css/
     styles.css
   js/
-    app.js                # Entry point — wires DOM, renderer, and player
+    app.js                # Entry point — wires DOM, renderer, player, and audio
     fretboard-renderer.js # SVG fretboard drawing
     lesson-player.js      # Playback state machine
     lesson-loader.js      # Fetches lesson JSON
-    audio-engine.js       # Stub for future Web Audio API support
+    audio-engine.js       # Metronome + bass synth (Web Audio API)
+  scripts/
+    validate-lessons.js   # Validates data/*.json against TypeSpec schema
 ```
 
 ## Lesson data
@@ -49,8 +63,14 @@ Lessons are defined in JSON using musical coordinates (string number, fret numbe
 
 String numbering follows TAB convention: **string 1 (G) is at the top** of the diagram, string 4 (E) is at the bottom. This matches the perspective of a player looking down at the neck.
 
-See `CLAUDE.md` for the full schema and coordinate system documentation.
+To add a new lesson: create a `data/<id>.json` file and append the ID to `data/lessons.json`. No other changes needed.
 
-## Current lesson
+See `CLAUDE.md` for the full schema, coordinate system, and architecture documentation.
 
-**C Major — Shape 1** covers frets 2–5 across all four strings, with roots on the A string (fret 3) and G string (fret 5).
+## Validation
+
+```sh
+npm run validate
+```
+
+Compiles `lesson-schema.tsp` to JSON Schema and validates all lesson files in `data/`. Also runs automatically on every push via GitHub Actions.
