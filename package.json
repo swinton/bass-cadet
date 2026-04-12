@@ -2,11 +2,14 @@
   "name": "bass-practitioner",
   "private": true,
   "scripts": {
-    "validate": "node scripts/validate-lessons.js"
+    "validate": "node scripts/validate-lessons.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "devDependencies": {
     "@typespec/compiler": "^1.11.0",
     "@typespec/json-schema": "^1.11.0",
-    "ajv": "^8.18.0"
+    "ajv": "^8.18.0",
+    "vitest": "^3.2.4"
   }
 }
