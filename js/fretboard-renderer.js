@@ -60,8 +60,8 @@ export class FretboardRenderer {
   // --- Geometry helpers ---
 
   _getUniqueFrets(lesson) {
-    const frets = lesson.visibleNotes.map(n => n.fret);
-    return [...new Set(frets)].sort((a, b) => a - b);
+    const { startFret, fretCount } = lesson.layout;
+    return Array.from({ length: fretCount }, (_, i) => startFret + i);
   }
 
   // Produces N+1 equally-spaced wires for N unique fret columns

@@ -458,13 +458,16 @@ Lesson data uses the actual fret number (e.g. `"fret": 3` means the 3rd fret of 
 
 ### Fret column layout
 
-The renderer derives visual x-positions from the unique fret numbers present in
-`visibleNotes`. It spaces them evenly across the fret zone:
+The renderer derives visual x-positions from the full fret range declared by
+`layout.startFret` and `layout.fretCount` — **not** from the frets present in
+`visibleNotes`. This ensures fret position markers and note circles always land at
+the correct absolute fret position regardless of which frets have notes in a lesson.
 
 ```js
-// N unique frets → N+1 equally-spaced wires, note columns at wire midpoints
-const spacing = (fretRight - fretLeft) / uniqueFrets.length;
-const wires = uniqueFrets.map((_, i) => fretLeft + i * spacing).concat([fretRight]);
+// fretCount columns → fretCount+1 equally-spaced wires, note columns at wire midpoints
+const allFrets = Array.from({ length: fretCount }, (_, i) => startFret + i);
+const spacing = (fretRight - fretLeft) / fretCount;
+const wires = allFrets.map((_, i) => fretLeft + i * spacing).concat([fretRight]);
 const columnX = (wires[i] + wires[i + 1]) / 2; // center of column i
 ```
 
