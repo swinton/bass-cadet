@@ -16,8 +16,9 @@ The application should help a bass player practice scales visually by:
 * showing a bass fretboard
 * highlighting notes in sequence
 * supporting next / previous shape navigation
-* supporting ascending and descending playback
-* supporting adjustable tempo
+* supporting ascending, descending, and ascending+descending playback
+* supporting adjustable tempo (slider and keyboard shortcuts)
+* metronome click track keeping time with the tempo
 * eventually supporting note audio
 
 The first MVP should focus on a single lesson only:
@@ -53,11 +54,12 @@ Potential future migration to React is fine if the app grows substantially.
 
 ## Core Architecture
 
-Separate the app into three concerns:
+Separate the app into four concerns:
 
 1. Lesson data
 2. Rendering
 3. Playback
+4. Audio
 
 ### Lesson data
 
@@ -84,6 +86,18 @@ Lesson data should use musical coordinates such as:
 * degree
 
 The renderer should derive visual positions from those musical coordinates.
+
+### Computed vs. stored playback patterns
+
+Only store musically distinct sequences in the lesson JSON (`ascending`,
+`descending`). Derived combinations — such as `"both"` (ascending then descending)
+— should be computed at runtime in `LessonPlayer.getCurrentSequence()`, not stored
+in JSON. This keeps the schema accurate, avoids sync issues when adding new lessons,
+and keeps the join logic (e.g. skip the duplicate pivot note) in one place.
+
+If a new combination mode is added, add a branch in `getCurrentSequence()` and
+extend the whitelist in `setPlaybackPattern()`. Do not add new keys to lesson JSON
+unless the sequence is genuinely lesson-specific and cannot be derived.
 
 ---
 
@@ -135,7 +149,7 @@ model LayoutConfig {
 model DefaultConfig {
   tempo?: uint16 = 80;
   loop?: boolean = true;
-  playbackPattern?: string = "ascending";
+  playbackPattern?: PlaybackPatternName = "ascending";
 }
 
 model VisibleNote {
@@ -147,7 +161,10 @@ model VisibleNote {
   role: NoteRole;
 }
 
-alias PlaybackPatterns = Record<string[]>;
+model PlaybackPatterns {
+  ascending?: string[];
+  descending?: string[];
+}
 
 model Lesson {
   id: string;
@@ -191,7 +208,7 @@ model LessonSeries {
   "defaults": {
     "tempo": 80,
     "loop": true,
-    "playbackPattern": "ascending"
+    "playbackPattern": "both"
   },
   "visibleNotes": [
     { "id": "n1",  "string": 1, "fret": 2, "note": "A", "degree": 6, "role": "scale" },
@@ -234,7 +251,7 @@ Suggested state shape:
 {
   tempo: 80,
   loop: true,
-  playbackPattern: "ascending",
+  playbackPattern: "both",  // "ascending" | "descending" | "both"
   isPlaying: false,
   activeStepIndex: -1,
   timerId: null
@@ -280,6 +297,68 @@ Suggested methods:
 * `createNoteElement()`
 * `setActiveNote()`
 * `clearActiveNote()`
+
+---
+
+## audio-engine.js Responsibilities
+
+`audio-engine.js` manages the metronome click track.
+
+### Web Audio timing — do not use setTimeout for sound
+
+`setTimeout` has ±10–50ms jitter from the JS event loop. At practice tempos this
+is audible. Instead, use the **Web Audio lookahead scheduler** pattern:
+
+* Schedule audio events onto `AudioContext.currentTime` (sample-accurate clock)
+* Use `setTimeout` only to pump the scheduler every ~25ms
+* Schedule events 100ms ahead — this gives a 75ms buffer against JS jitter
+
+```js
+_pump() {
+  while (this._nextClickTime < this._context.currentTime + this._lookahead) {
+    this._scheduleClick(this._nextClickTime);
+    this._nextClickTime += 60.0 / this._tempo;
+  }
+  this._timerId = setTimeout(() => this._pump(), this._scheduleInterval);
+}
+```
+
+### AudioContext initialization
+
+`AudioContext` must be created (or resumed) after a user gesture — browsers block
+audio that starts before any interaction. Initialize lazily on the first `start()`
+call, not at module load time.
+
+### Interface
+
+* `start(tempo)` — begin metronome; initializes context if needed
+* `stop()` — stop; clears the scheduler timeout
+* `setTempo(bpm)` — update BPM; takes effect on the next scheduled beat
+
+---
+
+## Keyboard Shortcuts
+
+| Key | Action |
+|---|---|
+| `Space` | Play / pause |
+| `↑` | Increase tempo by 5 BPM (max 200) |
+| `↓` | Decrease tempo by 5 BPM (min 40) |
+
+Implemented in `app.js` via a `keydown` listener on `document`. Keypresses are
+ignored when an `<input>` has focus so the tempo slider works normally.
+
+---
+
+## Build & Validation
+
+Run `npm run validate` to compile `lesson-schema.tsp` → JSON Schema and validate
+all `data/*.json` files against the generated `Lesson` schema.
+
+The GitHub Actions workflow (`.github/workflows/build.yml`) runs this automatically
+on every push and pull request.
+
+When adding a new lesson JSON file, run `npm run validate` locally before committing.
 
 ---
 
@@ -334,21 +413,18 @@ const columnX = (wires[i] + wires[i + 1]) / 2; // center of column i
 
 ---
 
-## MVP Scope
+## Current State
 
-The MVP should include:
+The MVP is complete. What's shipped:
 
-* one lesson only
-* one HTML page
-* one lesson JSON file
-* one TypeSpec schema file
-* visual playback only
-* tempo slider
-* play / pause button
-* ascending / descending mode
+* one lesson (C Major, Shape 1)
+* SVG fretboard rendered from JSON lesson data
+* ascending, descending, and ascending+descending (both) playback modes
 * looping playback
-
-Audio can come later.
+* tempo slider (40–200 BPM)
+* keyboard shortcuts: Space (play/pause), ↑/↓ (tempo)
+* metronome click track via Web Audio lookahead scheduler
+* TypeSpec schema with CI validation on every push
 
 ---
 
@@ -356,7 +432,7 @@ Audio can come later.
 
 Possible future additions:
 
-* note audio using Web Audio API
+* note audio using Web Audio API (pitch synthesis per note)
 * additional scale families
 * series navigation
 * pentatonic lessons
