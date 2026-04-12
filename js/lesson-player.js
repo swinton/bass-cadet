@@ -4,6 +4,7 @@ export class LessonPlayer {
     this.audioEngine = audioEngine || null;
     this.onStateChange = onStateChange || (() => {});
     this.lesson = null;
+    this._scheduledStepIndex = -1;
     this.state = {
       tempo: 80,
       loop: true,
@@ -30,7 +31,9 @@ export class LessonPlayer {
     this.state.tempo = bpm;
     this.audioEngine?.setTempo(bpm);
     this.emitChange();
-    if (this.state.isPlaying) {
+    // When using dual-clock path, AudioEngine's pump picks up the new tempo
+    // automatically on the next interval — no need to restart scheduling.
+    if (this.state.isPlaying && !this.audioEngine) {
       clearTimeout(this.state.timerId);
       this.state.timerId = null;
       this.scheduleNextStep();
@@ -43,6 +46,7 @@ export class LessonPlayer {
     if (name !== "both" && !this.lesson?.playbackPatterns?.[name]) return;
     this.state.playbackPattern = name;
     this.state.activeStepIndex = -1;
+    this._scheduledStepIndex = -1;
     this.renderer.clearActiveNote();
     this.emitChange();
   }
@@ -58,9 +62,14 @@ export class LessonPlayer {
   play() {
     if (!this.lesson || this.state.isPlaying) return;
     this.state.isPlaying = true;
-    this.audioEngine?.start(this.state.tempo);
     this.emitChange();
-    this.scheduleNextStep();
+    if (this.audioEngine) {
+      this.audioEngine.start(this.state.tempo, (beatTime, beatDuration) => {
+        this._advanceStep(beatTime, beatDuration);
+      });
+    } else {
+      this.scheduleNextStep();
+    }
   }
 
   pause() {
@@ -68,6 +77,7 @@ export class LessonPlayer {
     this.state.isPlaying = false;
     clearTimeout(this.state.timerId);
     this.state.timerId = null;
+    this._scheduledStepIndex = -1;
     this.audioEngine?.stop();
     this.emitChange();
   }
@@ -79,6 +89,42 @@ export class LessonPlayer {
     this.emitChange();
   }
 
+  /**
+   * Called by AudioEngine's onBeat callback with the precise Web Audio clock
+   * time for the upcoming beat. Schedules note audio at that time and defers
+   * the visual update via setTimeout so the highlight lands in sync with sound.
+   */
+  _advanceStep(beatTime, beatDuration) {
+    if (!this.state.isPlaying) return;
+    const sequence = this.getCurrentSequence();
+    if (!sequence.length) return;
+
+    let next = this._scheduledStepIndex + 1;
+    if (next >= sequence.length) {
+      if (this.state.loop) {
+        next = 0;
+      } else {
+        this.stop();
+        return;
+      }
+    }
+    this._scheduledStepIndex = next;
+
+    const noteId = sequence[next];
+    const note = this.lesson.visibleNotes.find(n => n.id === noteId);
+    this.audioEngine.playNote(note, beatDuration, beatTime);
+
+    const ctx = this.audioEngine.context;
+    const delayMs = (beatTime - ctx.currentTime) * 1000;
+    setTimeout(() => {
+      if (!this.state.isPlaying) return;
+      this.state.activeStepIndex = next;
+      this.renderer.setActiveNote(noteId);
+      this.emitChange();
+    }, Math.max(0, delayMs));
+  }
+
+  // Fallback path used when no audioEngine is present.
   nextStep() {
     const sequence = this.getCurrentSequence();
     if (!sequence.length) return;
@@ -96,8 +142,6 @@ export class LessonPlayer {
     this.state.activeStepIndex = nextIndex;
     const noteId = sequence[nextIndex];
     this.renderer.setActiveNote(noteId);
-    const note = this.lesson.visibleNotes.find(n => n.id === noteId);
-    this.audioEngine?.playNote(note, 60 / this.state.tempo);
     this.emitChange();
   }
 

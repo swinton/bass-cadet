@@ -37,17 +37,26 @@ export class AudioEngine {
     this._lookahead = 0.1;        // seconds
     this._scheduleInterval = 25;  // milliseconds
     this._isMuted = false;
+    this._onBeat = null; // called (beatTime, beatDuration) for each scheduled beat
   }
 
-  get isMuted() { return this._isMuted; }
+  get isMuted()  { return this._isMuted; }
+  /** Expose the AudioContext so callers can compute delays against the same clock. */
+  get context()  { return this._context; }
 
   // --- Metronome ---
 
-  /** Start the metronome at the given BPM. Safe to call after a user gesture. */
-  start(tempo) {
+  /**
+   * Start the metronome at the given BPM.
+   * onBeat(beatTime, beatDuration) is called inside the pump for every beat
+   * that gets scheduled, at the same time as the click — so callers can
+   * schedule note audio on the same Web Audio clock.
+   */
+  start(tempo, onBeat = null) {
     if (this._isRunning) return;
     this._ensureContext();
     this._tempo = tempo;
+    this._onBeat = onBeat;
     this._isRunning = true;
     this._nextClickTime = this._context.currentTime + 0.05;
     this._pump();
@@ -56,6 +65,7 @@ export class AudioEngine {
   /** Stop the metronome. */
   stop() {
     this._isRunning = false;
+    this._onBeat = null;
     clearTimeout(this._timerId);
     this._timerId = null;
   }
@@ -72,13 +82,13 @@ export class AudioEngine {
    * duration: seconds the note should sustain (typically one beat).
    * No-ops when muted.
    */
-  playNote(note, duration) {
+  playNote(note, duration, time = null) {
     if (this._isMuted || !note) return;
     this._ensureContext();
 
     const freq = this._noteToFreq(note);
     const ctx = this._context;
-    const now = ctx.currentTime;
+    const now = time ?? ctx.currentTime;
 
     // --- Oscillators ---
     // Sawtooth for harmonic content; sine doubled at octave below for sub warmth
@@ -159,8 +169,11 @@ export class AudioEngine {
     if (!this._isRunning) return;
 
     while (this._nextClickTime < this._context.currentTime + this._lookahead) {
-      if (!this._isMuted) this._scheduleClick(this._nextClickTime);
-      this._nextClickTime += 60.0 / this._tempo;
+      const time = this._nextClickTime;
+      const duration = 60.0 / this._tempo;
+      if (!this._isMuted) this._scheduleClick(time);
+      this._onBeat?.(time, duration);
+      this._nextClickTime += duration;
     }
 
     this._timerId = setTimeout(() => this._pump(), this._scheduleInterval);

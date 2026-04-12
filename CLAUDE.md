@@ -302,7 +302,9 @@ Suggested methods:
 
 ## audio-engine.js Responsibilities
 
-`audio-engine.js` manages the metronome click track.
+`audio-engine.js` manages the metronome click track and bass note synthesis. It
+also drives note scheduling for `LessonPlayer` via an `onBeat` callback — see
+**Dual-clock sync** below.
 
 ### Web Audio timing — do not use setTimeout for sound
 
@@ -316,8 +318,11 @@ is audible. Instead, use the **Web Audio lookahead scheduler** pattern:
 ```js
 _pump() {
   while (this._nextClickTime < this._context.currentTime + this._lookahead) {
-    this._scheduleClick(this._nextClickTime);
-    this._nextClickTime += 60.0 / this._tempo;
+    const time = this._nextClickTime;
+    const duration = 60.0 / this._tempo;
+    if (!this._isMuted) this._scheduleClick(time);
+    this._onBeat?.(time, duration);  // drives LessonPlayer note scheduling
+    this._nextClickTime += duration;
   }
   this._timerId = setTimeout(() => this._pump(), this._scheduleInterval);
 }
@@ -331,9 +336,51 @@ call, not at module load time.
 
 ### Interface
 
-* `start(tempo)` — begin metronome; initializes context if needed
+* `start(tempo, onBeat?)` — begin metronome; `onBeat(beatTime, beatDuration)` is
+  called inside the pump for every scheduled beat so callers can schedule audio on
+  the same Web Audio clock
 * `stop()` — stop; clears the scheduler timeout
 * `setTempo(bpm)` — update BPM; takes effect on the next scheduled beat
+* `playNote(note, duration, time?)` — synthesise a bass note; `time` pins it to a
+  specific Web Audio clock time (pass the `beatTime` from `onBeat`)
+* `get context` — exposes the `AudioContext` so callers can compute delays against
+  the same clock
+
+---
+
+## Dual-clock sync
+
+**Problem:** the metronome click is scheduled up to 100ms ahead on the Web Audio
+clock. If note audio is played at `ctx.currentTime` (JS thread time), it drifts
+against the click — noticeably so when tempo is changed mid-playback.
+
+**Solution:** `LessonPlayer` registers an `onBeat` callback with
+`audioEngine.start()`. For each beat the pump fires both the click *and* the
+callback at the same scheduled `beatTime`. `LessonPlayer._advanceStep()`:
+
+1. Calls `audioEngine.playNote(note, duration, beatTime)` — audio lands exactly
+   with the click.
+2. Computes `delayMs = (beatTime - ctx.currentTime) * 1000` and fires a
+   `setTimeout` to move the visual highlight to arrive at the same moment.
+
+```js
+// lesson-player.js — _advanceStep
+this.audioEngine.playNote(note, beatDuration, beatTime);        // audio on Web Audio clock
+const delayMs = (beatTime - ctx.currentTime) * 1000;
+setTimeout(() => {
+  this.renderer.setActiveNote(noteId);                          // visual in sync
+}, Math.max(0, delayMs));
+```
+
+Consequences:
+* `setTempo()` no longer restarts `scheduleNextStep()` — the pump picks up the
+  new tempo automatically on its next interval, and already-committed beats play
+  at their scheduled times.
+* `_scheduledStepIndex` tracks which step has been *audio-scheduled* (ahead of
+  time); `state.activeStepIndex` tracks which step is *visually active* (present
+  time). They are intentionally different during the lookahead window.
+* The no-audioEngine fallback path (`scheduleNextStep` / `nextStep`) is kept for
+  testing or environments without Web Audio.
 
 ---
 
