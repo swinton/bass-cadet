@@ -181,16 +181,6 @@
       stroke: none;
     }
 
-    .labels {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      margin-top: 10px;
-      padding-left: 52px;
-      color: var(--muted);
-      font-size: 0.9rem;
-      letter-spacing: 0.03em;
-    }
-
     .footer-note {
       font-size: 0.9rem;
       color: var(--muted);
@@ -212,7 +202,6 @@
       .board-wrap { padding: 14px; border-radius: 20px; }
       .btn, .chip, select { width: 100%; }
       .topbar { grid-template-columns: 1fr; }
-      .labels { padding-left: 16px; font-size: 0.78rem; }
     }
   </style>
 </head>
@@ -277,14 +266,6 @@
         <circle class="note" cx="1030" cy="238" r="22" />
         <circle class="note" cx="1030" cy="318" r="22" />
       </svg>
-
-      <div class="labels" aria-hidden="true">
-        <span>3rd fret</span>
-        <span>5th fret</span>
-        <span>7th fret</span>
-        <span>8th fret</span>
-        <span>10th fret</span>
-      </div>
 
       <div class="legend">
         <div class="legend-item"><span class="swatch"></span> Scale tone</div>
