@@ -21,3 +21,6 @@ jobs:
 
       - name: Validate lesson JSON against TypeSpec schema
         run: npm run validate
+
+      - name: Run unit tests
+        run: npm test
