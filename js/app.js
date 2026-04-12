@@ -32,6 +32,7 @@ function main() {
   const tempoInput = document.querySelector("#tempo");
   const tempoValue = document.querySelector("#tempo-value");
   const activeNoteLabel = document.querySelector("#active-note-label");
+  const legendRootLabel = document.querySelector("#legend-root-label");
   const lessonSelect = document.querySelector("#lesson-select");
 
   const renderer = new FretboardRenderer({ svgEl, labelsEl });
@@ -44,6 +45,8 @@ function main() {
         titleEl.textContent = lesson.title;
         subtitleEl.textContent = lesson.subtitle || "";
         shapeLabel.textContent = lesson.subtitle || "";
+        const rootNote = lesson.visibleNotes.find(n => n.role === "root");
+        legendRootLabel.textContent = rootNote?.note ? `Root (${rootNote.note})` : "Root";
       }
       playBtn.textContent = state.isPlaying ? "❚❚ Pause" : "▶ Play";
       patternBtns.forEach(btn => {

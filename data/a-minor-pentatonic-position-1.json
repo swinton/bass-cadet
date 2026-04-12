@@ -1,0 +1,36 @@
+{
+  "id": "a-minor-pentatonic-position-1",
+  "title": "A Minor Pentatonic",
+  "subtitle": "Position 1",
+  "instrument": {
+    "type": "bass",
+    "strings": 4,
+    "tuning": ["E", "A", "D", "G"]
+  },
+  "layout": {
+    "startFret": 2,
+    "fretCount": 4,
+    "showFretLabels": true,
+    "fretMarkers": [3, 5]
+  },
+  "defaults": {
+    "tempo": 80,
+    "loop": true,
+    "playbackPattern": "both"
+  },
+  "visibleNotes": [
+    { "id": "n1", "string": 4, "fret": 3, "note": "G", "degree": 7, "role": "scale" },
+    { "id": "n2", "string": 4, "fret": 5, "note": "A", "degree": 1, "role": "root"  },
+    { "id": "n3", "string": 3, "fret": 3, "note": "C", "degree": 3, "role": "scale" },
+    { "id": "n4", "string": 3, "fret": 5, "note": "D", "degree": 4, "role": "scale" },
+    { "id": "n5", "string": 2, "fret": 2, "note": "E", "degree": 5, "role": "scale" },
+    { "id": "n6", "string": 2, "fret": 5, "note": "G", "degree": 7, "role": "scale" },
+    { "id": "n7", "string": 1, "fret": 2, "note": "A", "degree": 1, "role": "root"  },
+    { "id": "n8", "string": 1, "fret": 5, "note": "C", "degree": 3, "role": "scale" }
+  ],
+  "playbackPatterns": {
+    "ascending":  ["n2","n3","n4","n5","n6","n7"],
+    "descending": ["n7","n6","n5","n4","n3","n2","n1"],
+    "both":       ["n2","n3","n4","n5","n6","n7","n6","n5","n4","n3","n2","n1"]
+  }
+}
