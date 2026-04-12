@@ -104,7 +104,7 @@ unless the sequence is genuinely lesson-specific and cannot be derived.
 ## Suggested Folder Structure
 
 ```text
-bass-practice/
+bass-practitioner/
   index.html
   lesson-schema.tsp
   data/

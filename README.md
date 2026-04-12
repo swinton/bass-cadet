@@ -1,4 +1,4 @@
-# Bass Scale Practice
+# 👩‍🎤 Bass Practitioner
 
 **Live:** https://swinton.github.io/bass-practitioner/
 
