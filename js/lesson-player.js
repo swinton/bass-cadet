@@ -1,6 +1,7 @@
 export class LessonPlayer {
-  constructor({ renderer, onStateChange }) {
+  constructor({ renderer, audioEngine, onStateChange }) {
     this.renderer = renderer;
+    this.audioEngine = audioEngine || null;
     this.onStateChange = onStateChange || (() => {});
     this.lesson = null;
     this.state = {
@@ -27,6 +28,7 @@ export class LessonPlayer {
 
   setTempo(bpm) {
     this.state.tempo = bpm;
+    this.audioEngine?.setTempo(bpm);
     this.emitChange();
     if (this.state.isPlaying) {
       clearTimeout(this.state.timerId);
@@ -54,6 +56,7 @@ export class LessonPlayer {
   play() {
     if (!this.lesson || this.state.isPlaying) return;
     this.state.isPlaying = true;
+    this.audioEngine?.start(this.state.tempo);
     this.emitChange();
     this.scheduleNextStep();
   }
@@ -63,6 +66,7 @@ export class LessonPlayer {
     this.state.isPlaying = false;
     clearTimeout(this.state.timerId);
     this.state.timerId = null;
+    this.audioEngine?.stop();
     this.emitChange();
   }
 

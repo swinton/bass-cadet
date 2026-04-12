@@ -1,5 +1,6 @@
 import { FretboardRenderer } from "./fretboard-renderer.js";
 import { LessonPlayer } from "./lesson-player.js";
+import { AudioEngine } from "./audio-engine.js";
 import { loadLesson } from "./lesson-loader.js";
 
 function main() {
@@ -14,8 +15,10 @@ function main() {
   const activeNoteLabel = document.querySelector("#active-note-label");
 
   const renderer = new FretboardRenderer({ svgEl, labelsEl });
+  const audioEngine = new AudioEngine();
   const player = new LessonPlayer({
     renderer,
+    audioEngine,
     onStateChange: ({ lesson, state }) => {
       if (lesson) {
         titleEl.textContent = lesson.title;
