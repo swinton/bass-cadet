@@ -1,0 +1,12 @@
+{
+  "name": "bass-practitioner",
+  "private": true,
+  "scripts": {
+    "validate": "node scripts/validate-lessons.js"
+  },
+  "devDependencies": {
+    "@typespec/compiler": "^1.11.0",
+    "@typespec/json-schema": "^1.11.0",
+    "ajv": "^8.18.0"
+  }
+}

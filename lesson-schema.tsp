@@ -1,6 +1,9 @@
 // lesson-schema.tsp
 // TypeSpec schema for a lesson-driven bass practice player MVP.
 
+import "@typespec/json-schema";
+using TypeSpec.JsonSchema;
+
 alias InstrumentType = "bass";
 alias NoteRole = "root" | "scale" | "target" | "ghost";
 alias PlaybackPatternName = "ascending" | "descending";
@@ -38,6 +41,7 @@ model PlaybackPatterns {
   descending?: string[];
 }
 
+@jsonSchema
 model Lesson {
   id: string;
   title: string;
