@@ -1,5 +1,9 @@
 /**
- * AudioEngine — metronome click using the Web Audio API lookahead scheduler.
+ * AudioEngine
+ *
+ * Two responsibilities:
+ *   1. Metronome click track — Web Audio lookahead scheduler (see below)
+ *   2. Bass note synthesis — triggered per note step
  *
  * Why not setTimeout for timing?
  * setTimeout fires are subject to JS event loop jitter (often ±10–50ms). At
@@ -14,6 +18,15 @@
  *   - scheduleInterval (25ms): how often the scheduler function runs
  * The overlap gives a 75ms safety margin against JS thread latency spikes.
  */
+
+// Open-string frequencies for standard bass tuning (EADG)
+const OPEN_STRING_HZ = {
+  1: 97.9989,  // G2
+  2: 73.4162,  // D2
+  3: 55.0000,  // A1
+  4: 41.2034,  // E1
+};
+
 export class AudioEngine {
   constructor() {
     this._context = null;
@@ -23,7 +36,12 @@ export class AudioEngine {
     this._timerId = null;
     this._lookahead = 0.1;        // seconds
     this._scheduleInterval = 25;  // milliseconds
+    this._isMuted = false;
   }
+
+  get isMuted() { return this._isMuted; }
+
+  // --- Metronome ---
 
   /** Start the metronome at the given BPM. Safe to call after a user gesture. */
   start(tempo) {
@@ -31,7 +49,6 @@ export class AudioEngine {
     this._ensureContext();
     this._tempo = tempo;
     this._isRunning = true;
-    // Start slightly in the future so the first click isn't clipped
     this._nextClickTime = this._context.currentTime + 0.05;
     this._pump();
   }
@@ -48,6 +65,78 @@ export class AudioEngine {
     this._tempo = tempo;
   }
 
+  // --- Note synthesis ---
+
+  /**
+   * Synthesise a bass note for the given VisibleNote.
+   * duration: seconds the note should sustain (typically one beat).
+   * No-ops when muted.
+   */
+  playNote(note, duration) {
+    if (this._isMuted || !note) return;
+    this._ensureContext();
+
+    const freq = this._noteToFreq(note);
+    const ctx = this._context;
+    const now = ctx.currentTime;
+
+    // --- Oscillators ---
+    // Sawtooth for harmonic content; sine doubled at octave below for sub warmth
+    const saw = ctx.createOscillator();
+    saw.type = "sawtooth";
+    saw.frequency.value = freq;
+
+    const sub = ctx.createOscillator();
+    sub.type = "sine";
+    sub.frequency.value = freq / 2; // one octave down
+
+    const sawGain = ctx.createGain();
+    sawGain.gain.value = 0.45;
+
+    const subGain = ctx.createGain();
+    subGain.gain.value = 0.55;
+
+    // --- Low-pass filter ---
+    // Starts open (bright transient) then closes quickly (warm sustain),
+    // mimicking the behaviour of a plucked string
+    const filter = ctx.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.Q.value = 1.5;
+    filter.frequency.setValueAtTime(1200, now);
+    filter.frequency.exponentialRampToValueAtTime(280, now + 0.25);
+
+    // --- Amplitude envelope ---
+    const env = ctx.createGain();
+    const safeDuration = Math.max(duration, 0.05);
+    env.gain.setValueAtTime(0, now);
+    env.gain.linearRampToValueAtTime(0.55, now + 0.004); // fast attack (4ms)
+    env.gain.exponentialRampToValueAtTime(0.22, now + 0.12); // decay
+    env.gain.setValueAtTime(0.22, now + safeDuration * 0.7);
+    env.gain.exponentialRampToValueAtTime(0.001, now + safeDuration); // release
+
+    // --- Routing: osc → blend → filter → envelope → output ---
+    saw.connect(sawGain);
+    sub.connect(subGain);
+    sawGain.connect(filter);
+    subGain.connect(filter);
+    filter.connect(env);
+    env.connect(ctx.destination);
+
+    const end = now + safeDuration + 0.02;
+    saw.start(now);
+    sub.start(now);
+    saw.stop(end);
+    sub.stop(end);
+  }
+
+  // --- Mute ---
+
+  /** Toggle mute state. Returns the new muted value. */
+  toggleMute() {
+    this._isMuted = !this._isMuted;
+    return this._isMuted;
+  }
+
   // --- Internal ---
 
   _ensureContext() {
@@ -59,13 +148,18 @@ export class AudioEngine {
     }
   }
 
-  /** Scheduler: runs every _scheduleInterval ms, scheduling any clicks that
-   *  fall within the lookahead window onto the Web Audio clock. */
+  /** Frequency for a note given its string and fret. */
+  _noteToFreq(note) {
+    const openHz = OPEN_STRING_HZ[note.string];
+    return openHz * Math.pow(2, note.fret / 12);
+  }
+
+  /** Pump the lookahead scheduler. */
   _pump() {
     if (!this._isRunning) return;
 
     while (this._nextClickTime < this._context.currentTime + this._lookahead) {
-      this._scheduleClick(this._nextClickTime);
+      if (!this._isMuted) this._scheduleClick(this._nextClickTime);
       this._nextClickTime += 60.0 / this._tempo;
     }
 
@@ -82,7 +176,7 @@ export class AudioEngine {
 
     osc.frequency.value = 1000; // Hz — crisp, sits above bass register
     gain.gain.setValueAtTime(0.3, time);
-    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.04); // 40ms decay
+    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.04);
 
     osc.start(time);
     osc.stop(time + 0.04);

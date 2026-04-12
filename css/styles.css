@@ -33,7 +33,7 @@ body {
 
 .topbar {
   display: grid;
-  grid-template-columns: 1fr auto auto auto auto auto;
+  grid-template-columns: 1fr auto auto auto auto auto auto;
   gap: 12px;
   align-items: center;
   background: var(--panel);

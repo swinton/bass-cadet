@@ -96,6 +96,8 @@ export class LessonPlayer {
     this.state.activeStepIndex = nextIndex;
     const noteId = sequence[nextIndex];
     this.renderer.setActiveNote(noteId);
+    const note = this.lesson.visibleNotes.find(n => n.id === noteId);
+    this.audioEngine?.playNote(note, 60 / this.state.tempo);
     this.emitChange();
   }
 

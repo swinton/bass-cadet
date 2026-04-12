@@ -9,6 +9,7 @@ function main() {
   const svgEl = document.querySelector("#fretboard");
   const labelsEl = document.querySelector("#fret-labels");
   const playBtn = document.querySelector("#play-btn");
+  const muteBtn = document.querySelector("#mute-btn");
   const patternBtns = document.querySelectorAll(".pattern-btn");
   const tempoInput = document.querySelector("#tempo");
   const tempoValue = document.querySelector("#tempo-value");
@@ -43,6 +44,11 @@ function main() {
   });
 
   playBtn.addEventListener("click", () => player.togglePlay());
+  muteBtn.addEventListener("click", () => {
+    const muted = audioEngine.toggleMute();
+    muteBtn.textContent = muted ? "Sound: Off" : "Sound: On";
+    muteBtn.setAttribute("aria-pressed", String(muted));
+  });
   document.querySelector(".pattern-toggle").addEventListener("click", e => {
     const btn = e.target.closest(".pattern-btn");
     if (btn) player.setPlaybackPattern(btn.dataset.pattern);
