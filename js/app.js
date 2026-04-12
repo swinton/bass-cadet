@@ -49,6 +49,20 @@ function main() {
   });
   tempoInput.addEventListener("input", e => player.setTempo(Number(e.target.value)));
 
+  document.addEventListener("keydown", e => {
+    if (e.target.tagName === "INPUT") return; // don't intercept when typing in a field
+    if (e.key === " ") {
+      e.preventDefault();
+      player.togglePlay();
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      player.setTempo(Math.min(200, player.state.tempo + 5));
+    } else if (e.key === "ArrowDown") {
+      e.preventDefault();
+      player.setTempo(Math.max(40, player.state.tempo - 5));
+    }
+  });
+
   loadLesson("./data/c-major-shape-1.json")
     .then(lesson => player.loadLesson(lesson))
     .catch(err => {
