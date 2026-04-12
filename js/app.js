@@ -67,6 +67,7 @@ function main() {
   });
 
   let registry = [];
+  let loadAbortController = null;
 
   function updateNav(id) {
     const idx = registry.indexOf(id);
@@ -76,12 +77,18 @@ function main() {
   }
 
   function navigateToLesson(id) {
+    // Cancel any in-flight lesson fetch before starting a new one
+    if (loadAbortController) loadAbortController.abort();
+    loadAbortController = new AbortController();
+    const signal = loadAbortController.signal;
+
     player.stop();
     history.pushState({ lesson: id }, "", `?lesson=${id}`);
     updateNav(id);
-    loadLesson(`./data/${id}.json`)
+    loadLesson(`./data/${id}.json`, signal)
       .then(lesson => player.loadLesson(lesson))
       .catch(err => {
+        if (err.name === "AbortError") return; // superseded by a newer navigation
         console.error(err);
         activeNoteLabel.textContent = `Error: ${err.message}`;
       });
@@ -107,6 +114,8 @@ function main() {
   });
   tempoInput.addEventListener("input", e => player.setTempo(Number(e.target.value)));
 
+  lessonSelect.addEventListener("change", () => navigateToLesson(lessonSelect.value));
+
   window.addEventListener("popstate", () => {
     const id = lessonIdFromUrl(registry);
     updateNav(id);
@@ -131,8 +140,6 @@ function main() {
       player.setTempo(Math.max(40, player.state.tempo - 5));
     }
   });
-
-  lessonSelect.addEventListener("change", () => navigateToLesson(lessonSelect.value));
 
   loadRegistry()
     .then(reg => {
