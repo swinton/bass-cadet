@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bass Scale Practice - Static Mockup</title>
+  <style>
+    :root {
+      --bg: #f4f0e8;
+      --panel: #efe8dd;
+      --ink: #111;
+      --muted: #6b665f;
+      --line: #15120f;
+      --fret: #59524b;
+      --dot-fill: #111;
+      --dot-open: #f8f5ef;
+      --shadow: rgba(0,0,0,0.12);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px;
+    }
+
+    .app {
+      width: min(1180px, 100%);
+      display: grid;
+      gap: 18px;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto auto auto;
+      gap: 12px;
+      align-items: center;
+      background: var(--panel);
+      border: 2px solid rgba(0,0,0,0.18);
+      border-radius: 18px;
+      padding: 14px 16px;
+      box-shadow: 0 8px 20px var(--shadow);
+    }
+
+    .title {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .title h1 {
+      margin: 0;
+      font-size: 1.25rem;
+      letter-spacing: 0.02em;
+    }
+
+    .title p {
+      margin: 0;
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+
+    .btn, .chip, select {
+      border: 2px solid var(--ink);
+      background: #faf7f1;
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-size: 0.95rem;
+    }
+
+    .btn {
+      cursor: default;
+      font-weight: 600;
+      min-width: 90px;
+    }
+
+    .btn.play {
+      min-width: 110px;
+    }
+
+    .chip {
+      font-weight: 700;
+      background: #111;
+      color: #f8f5ef;
+    }
+
+    .board-wrap {
+      background: var(--panel);
+      border: 2px solid rgba(0,0,0,0.18);
+      border-radius: 28px;
+      padding: 24px;
+      box-shadow: 0 10px 24px var(--shadow);
+    }
+
+    .legend {
+      display: flex;
+      gap: 18px;
+      align-items: center;
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: 0.92rem;
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .swatch {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid var(--ink);
+      background: var(--dot-fill);
+      display: inline-block;
+    }
+
+    .swatch.open {
+      background: var(--dot-open);
+    }
+
+    .swatch.ghost {
+      background: rgba(17,17,17,0.18);
+      border-color: transparent;
+    }
+
+    svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .nut {
+      fill: var(--line);
+    }
+
+    .string {
+      stroke: var(--line);
+      stroke-linecap: round;
+    }
+
+    .string.s1 { stroke-width: 4; }
+    .string.s2 { stroke-width: 5; }
+    .string.s3 { stroke-width: 6; }
+    .string.s4 { stroke-width: 7; }
+
+    .fret {
+      stroke: var(--fret);
+      stroke-width: 10;
+      opacity: 0.9;
+    }
+
+    .rail {
+      stroke: var(--line);
+      stroke-width: 8;
+      stroke-linecap: round;
+    }
+
+    .note {
+      fill: var(--dot-fill);
+      stroke: var(--ink);
+      stroke-width: 2.5;
+    }
+
+    .note.root {
+      fill: var(--dot-open);
+    }
+
+    .note.ghost {
+      fill: rgba(17,17,17,0.18);
+      stroke: none;
+    }
+
+    .labels {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      margin-top: 10px;
+      padding-left: 52px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      letter-spacing: 0.03em;
+    }
+
+    .footer-note {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-top: 12px;
+    }
+
+    @media (max-width: 900px) {
+      .topbar {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .title {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (max-width: 640px) {
+      body { padding: 16px; }
+      .board-wrap { padding: 14px; border-radius: 20px; }
+      .btn, .chip, select { width: 100%; }
+      .topbar { grid-template-columns: 1fr; }
+      .labels { padding-left: 16px; font-size: 0.78rem; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="topbar" aria-label="Static controls">
+      <div class="title">
+        <h1>C Major</h1>
+        <p>Shape 1 · static mockup</p>
+      </div>
+      <button class="btn">◀ Prev</button>
+      <div class="chip">Shape 1</div>
+      <button class="btn">Next ▶</button>
+      <button class="btn play">▶ Play</button>
+      <select aria-label="Tempo">
+        <option>80 BPM</option>
+      </select>
+    </section>
+
+    <section class="board-wrap">
+      <svg viewBox="0 0 1180 390" role="img" aria-label="Bass fretboard showing C major shape 1">
+        <!-- outer rails -->
+        <line class="rail" x1="22" y1="52" x2="1158" y2="52" />
+        <line class="rail" x1="22" y1="338" x2="1158" y2="338" />
+
+        <!-- nut -->
+        <rect class="nut" x="20" y="48" width="24" height="294" rx="3" />
+
+        <!-- strings -->
+        <line class="string s1" x1="44" y1="78" x2="1158" y2="78" />
+        <line class="string s2" x1="44" y1="158" x2="1158" y2="158" />
+        <line class="string s3" x1="44" y1="238" x2="1158" y2="238" />
+        <line class="string s4" x1="44" y1="318" x2="1158" y2="318" />
+
+        <!-- frets -->
+        <line class="fret" x1="300" y1="58" x2="300" y2="332" />
+        <line class="fret" x1="520" y1="58" x2="520" y2="332" />
+        <line class="fret" x1="740" y1="58" x2="740" y2="332" />
+        <line class="fret" x1="960" y1="58" x2="960" y2="332" />
+        <line class="fret" x1="1140" y1="58" x2="1140" y2="332" />
+
+        <!-- scale notes: approximate layout matching the reference image -->
+        <!-- fret 1 area -->
+        <circle class="note" cx="410" cy="78" r="22" />
+        <circle class="note" cx="410" cy="158" r="22" />
+        <circle class="note" cx="410" cy="238" r="22" />
+
+        <!-- fret 2 area -->
+        <circle class="note" cx="630" cy="158" r="22" />
+        <circle class="note root" cx="630" cy="238" r="22" />
+        <circle class="note ghost" cx="630" cy="198" r="20" />
+        <circle class="note" cx="630" cy="318" r="22" />
+
+        <!-- fret 3 area -->
+        <circle class="note" cx="850" cy="78" r="22" />
+
+        <!-- fret 4 area -->
+        <circle class="note root" cx="1030" cy="78" r="22" />
+        <circle class="note" cx="1030" cy="158" r="22" />
+        <circle class="note ghost" cx="1030" cy="198" r="20" />
+        <circle class="note" cx="1030" cy="238" r="22" />
+        <circle class="note" cx="1030" cy="318" r="22" />
+      </svg>
+
+      <div class="labels" aria-hidden="true">
+        <span>3rd fret</span>
+        <span>5th fret</span>
+        <span>7th fret</span>
+        <span>8th fret</span>
+        <span>10th fret</span>
+      </div>
+
+      <div class="legend">
+        <div class="legend-item"><span class="swatch"></span> Scale tone</div>
+        <div class="legend-item"><span class="swatch open"></span> Root (C)</div>
+        <div class="legend-item"><span class="swatch ghost"></span> Optional passing / guide marker</div>
+      </div>
+
+      <p class="footer-note">This first pass is intentionally static. The controls are present for layout only, and the fretboard is drawn to resemble your reference as closely as possible with HTML + CSS + SVG.</p>
+    </section>
+  </main>
+</body>
+</html>
