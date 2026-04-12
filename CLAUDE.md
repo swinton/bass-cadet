@@ -183,8 +183,8 @@ model LessonSeries {
     "tuning": ["E", "A", "D", "G"]
   },
   "layout": {
-    "startFret": 3,
-    "fretCount": 5,
+    "startFret": 2,
+    "fretCount": 4,
     "showFretLabels": true,
     "fretMarkers": [3, 5]
   },
@@ -194,21 +194,21 @@ model LessonSeries {
     "playbackPattern": "ascending"
   },
   "visibleNotes": [
-    { "id": "n1", "string": 4, "fret": 3, "role": "scale" },
-    { "id": "n2", "string": 3, "fret": 3, "role": "scale" },
-    { "id": "n3", "string": 2, "fret": 3, "role": "scale" },
-    { "id": "n4", "string": 3, "fret": 5, "role": "scale" },
-    { "id": "n5", "string": 2, "fret": 5, "role": "root" },
-    { "id": "n6", "string": 1, "fret": 5, "role": "scale" },
-    { "id": "n7", "string": 4, "fret": 7, "role": "scale" },
-    { "id": "n8", "string": 4, "fret": 8, "role": "root" },
-    { "id": "n9", "string": 3, "fret": 8, "role": "scale" },
-    { "id": "n10", "string": 2, "fret": 8, "role": "scale" },
-    { "id": "n11", "string": 1, "fret": 8, "role": "scale" }
+    { "id": "n1",  "string": 1, "fret": 2, "note": "A", "degree": 6, "role": "scale" },
+    { "id": "n2",  "string": 2, "fret": 2, "note": "E", "degree": 3, "role": "scale" },
+    { "id": "n3",  "string": 3, "fret": 2, "note": "B", "degree": 7, "role": "scale" },
+    { "id": "n4",  "string": 3, "fret": 3, "note": "C", "degree": 1, "role": "root"  },
+    { "id": "n5",  "string": 2, "fret": 3, "note": "F", "degree": 4, "role": "scale" },
+    { "id": "n6",  "string": 4, "fret": 3, "note": "G", "degree": 5, "role": "scale" },
+    { "id": "n7",  "string": 1, "fret": 4, "note": "B", "degree": 7, "role": "scale" },
+    { "id": "n8",  "string": 1, "fret": 5, "note": "C", "degree": 1, "role": "root"  },
+    { "id": "n9",  "string": 2, "fret": 5, "note": "G", "degree": 5, "role": "scale" },
+    { "id": "n10", "string": 3, "fret": 5, "note": "D", "degree": 2, "role": "scale" },
+    { "id": "n11", "string": 4, "fret": 5, "note": "A", "degree": 6, "role": "scale" }
   ],
   "playbackPatterns": {
-    "ascending": ["n5", "n2", "n4", "n1", "n7", "n8", "n9", "n3", "n10", "n6", "n11"],
-    "descending": ["n11", "n6", "n10", "n3", "n9", "n8", "n7", "n1", "n4", "n2", "n5"]
+    "ascending":  ["n6", "n11", "n3", "n4", "n10", "n2", "n5", "n9", "n1", "n7", "n8"],
+    "descending": ["n8", "n7", "n1", "n9", "n5", "n2", "n10", "n4", "n3", "n11", "n6"]
   }
 }
 ```
@@ -287,28 +287,49 @@ Suggested methods:
 
 Use musical coordinates rather than raw pixel coordinates.
 
-Suggested convention:
+### String numbering and TAB orientation
 
-* string 1 = highest string
-* string 4 = lowest string
+The fretboard diagram follows standard TAB notation — the perspective of a player
+looking down at the instrument from above:
 
-Suggested helper:
+* String 1 (G, highest pitch) appears at the **top** of the diagram
+* String 4 (E, lowest pitch) appears at the **bottom** of the diagram
+
+This is the opposite of standard musical staff notation (where higher pitch = higher
+on the page), but matches how a bassist sees the neck when playing.
+
+String numbering convention:
+
+* `string: 1` = G string (thinnest, highest pitch) → top of diagram
+* `string: 2` = D string
+* `string: 3` = A string
+* `string: 4` = E string (thickest, lowest pitch) → bottom of diagram
+
+The renderer's y-position formula reflects this directly:
 
 ```js
-function getNotePosition(note, layout, instrument, geometry) {
-  const { left, top, width, height } = geometry;
+// string 1 maps to stringTop (smallest y), string 4 maps to stringBottom (largest y)
+y = stringTop + (string - 1) * stringSpacing
+```
 
-  const stringCount = instrument.strings;
-  const stringSpacing = height / (stringCount - 1);
+### Fret numbering
 
-  const fretOffset = note.fret - layout.startFret;
-  const fretWidth = width / layout.fretCount;
+Fret numbers refer to standard guitar fret positions. The nut is the leftmost boundary
+of the diagram and is **not** counted as a fret. The space between the nut and the first
+fret wire is fret 1; the space between the first and second fret wires is fret 2; and so on.
 
-  const x = left + (fretOffset + 0.5) * fretWidth;
-  const y = top + (stringCount - note.string) * stringSpacing;
+Lesson data uses the actual fret number (e.g. `"fret": 3` means the 3rd fret of the neck).
 
-  return { x, y };
-}
+### Fret column layout
+
+The renderer derives visual x-positions from the unique fret numbers present in
+`visibleNotes`. It spaces them evenly across the fret zone:
+
+```js
+// N unique frets → N+1 equally-spaced wires, note columns at wire midpoints
+const spacing = (fretRight - fretLeft) / uniqueFrets.length;
+const wires = uniqueFrets.map((_, i) => fretLeft + i * spacing).concat([fretRight]);
+const columnX = (wires[i] + wires[i + 1]) / 2; // center of column i
 ```
 
 ---
