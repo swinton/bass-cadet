@@ -89,15 +89,25 @@ The renderer should derive visual positions from those musical coordinates.
 
 ### Computed vs. stored playback patterns
 
-Only store musically distinct sequences in the lesson JSON (`ascending`,
-`descending`). Derived combinations — such as `"both"` (ascending then descending)
-— should be computed at runtime in `LessonPlayer.getCurrentSequence()`, not stored
-in JSON. This keeps the schema accurate, avoids sync issues when adding new lessons,
-and keeps the join logic (e.g. skip the duplicate pivot note) in one place.
+The `"both"` playback mode can be either computed at runtime or stored explicitly
+in the lesson JSON, depending on whether the sequence is generically derivable.
+
+**Compute at runtime** (preferred default) when `both` is simply ascending then
+descending with the shared pivot note played once. `getCurrentSequence()` handles
+this: `[...ascending, ...descending.slice(1)]`.
+
+**Store explicitly** as `playbackPatterns.both` when the pattern has custom logic
+that can't be derived — for example, when the sequence travels below the root after
+descending (all current lessons do this). `getCurrentSequence()` checks for a stored
+`both` first and falls back to the computed version, so lessons that don't need
+custom behaviour don't have to provide it.
+
+Rule of thumb: if you need the player to visit sub-root notes or change direction
+more than once, store `both` explicitly. Otherwise omit it.
 
 If a new combination mode is added, add a branch in `getCurrentSequence()` and
-extend the whitelist in `setPlaybackPattern()`. Do not add new keys to lesson JSON
-unless the sequence is genuinely lesson-specific and cannot be derived.
+extend the whitelist in `setPlaybackPattern()`. Do not add new playback-mode keys
+to the schema unless they represent genuinely distinct musical sequences.
 
 ---
 
@@ -462,16 +472,27 @@ const columnX = (wires[i] + wires[i + 1]) / 2; // center of column i
 
 ## Current State
 
-The MVP is complete. What's shipped:
+What's shipped:
 
-* one lesson (C Major, Shape 1)
+* 5 lessons: C Major Shape 1, C Major Pentatonic Shape 1, A Minor Pentatonic
+  Position 1, C Major Arpeggio, C Major Seventh Arpeggio
 * SVG fretboard rendered from JSON lesson data
-* ascending, descending, and ascending+descending (both) playback modes
-* looping playback
-* tempo slider (40–200 BPM)
-* keyboard shortcuts: Space (play/pause), ↑/↓ (tempo)
-* metronome click track via Web Audio lookahead scheduler
-* TypeSpec schema with CI validation on every push
+* Bookmarkable lessons via `?lesson=<id>` URL param; lesson registry in
+  `data/lessons.json`; Prev/Next navigation with `history.pushState`; browser
+  back/forward via `popstate`; lesson dropdown in the legend bar
+* Dynamic root legend label derived from the loaded lesson's root note
+* Ascending, descending, and ascending+descending (both) playback modes
+* Looping playback
+* Tempo slider (40–200 BPM, step 5); keyboard shortcuts: Space (play/pause),
+  ↑/↓ (tempo ±5 BPM)
+* Metronome click track via Web Audio lookahead scheduler
+* Bass synth note audio per step (sawtooth + sub-octave sine → low-pass filter
+  → amplitude envelope); mute toggle
+* Dual-clock sync: note audio and visual highlights both driven from the same
+  Web Audio `beatTime`, eliminating click/synth drift on tempo changes
+* TypeSpec schema with CI validation on every push; playback pattern IDs
+  validated against `visibleNotes` at build time
+* Unit tests (Vitest, 22 tests) and e2e smoke tests (Playwright, 14 tests)
 
 ---
 
@@ -479,14 +500,12 @@ The MVP is complete. What's shipped:
 
 Possible future additions:
 
-* note audio using Web Audio API (pitch synthesis per note)
-* additional scale families
-* series navigation
-* pentatonic lessons
+* lessons beyond frets 1–5 (requires renderer support for scrollable/wider fretboard viewport)
+* additional keys and scale families
 * interval drills
-* user preferences
-* alternate tunings
 * finger suggestions
+* user preferences (default tempo, preferred playback mode)
+* alternate tunings (5-string, drop-D, etc.) — requires updating `OPEN_STRING_HZ` in audio engine
 * random practice mode
 * saved progress
 * eventual React migration if complexity grows
