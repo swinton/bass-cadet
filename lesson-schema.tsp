@@ -42,6 +42,9 @@ model VisibleNote {
 model PlaybackPatterns {
   ascending?: string[];
   descending?: string[];
+  // Optional explicit "both" sequence. If omitted, the player computes
+  // ascending + descending.slice(1) as a default.
+  both?: string[];
 }
 
 @jsonSchema

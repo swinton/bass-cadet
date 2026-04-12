@@ -110,6 +110,10 @@ export class LessonPlayer {
 
   getCurrentSequence() {
     if (this.state.playbackPattern === "both") {
+      // Prefer an explicit "both" sequence stored in the lesson; fall back to
+      // computing ascending + descending.slice(1) for lessons that omit it.
+      const stored = this.lesson?.playbackPatterns?.both;
+      if (stored?.length) return stored;
       const asc  = this.lesson?.playbackPatterns?.ascending  ?? [];
       const desc = this.lesson?.playbackPatterns?.descending ?? [];
       return asc.length && desc.length ? [...asc, ...desc.slice(1)] : asc;
