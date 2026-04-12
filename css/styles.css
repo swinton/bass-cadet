@@ -33,7 +33,7 @@ body {
 
 .topbar {
   display: grid;
-  grid-template-columns: 1fr auto auto auto auto auto auto;
+  grid-template-columns: 1fr auto auto auto auto auto auto auto;
   gap: 12px;
   align-items: center;
   background: var(--panel);
@@ -222,6 +222,7 @@ svg {
 
 @media (max-width: 900px) {
   .pattern-toggle { grid-column: 1 / -1; }
+  .drone-control   { grid-column: 1 / -1; }
 }
 
 @media (max-width: 640px) {
@@ -231,4 +232,43 @@ svg {
   .topbar { grid-template-columns: 1fr; }
   .pattern-toggle { width: 100%; }
   .pattern-toggle .pattern-btn { flex: 1; }
+  .drone-toggle { width: 100%; }
+  .drone-toggle .drone-btn { flex: 1; }
+}
+
+/* --- Drone control --- */
+
+.drone-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.drone-toggle {
+  display: flex;
+  gap: 0;
+}
+
+.drone-toggle .drone-btn {
+  border-radius: 0;
+  border-right-width: 1px;
+  min-width: 0;
+  padding: 10px 12px;
+}
+
+.drone-toggle .drone-btn:first-child { border-radius: 999px 0 0 999px; }
+.drone-toggle .drone-btn:last-child  { border-radius: 0 999px 999px 0; border-right-width: 2px; }
+.drone-toggle .drone-btn.active      { background: var(--ink); color: var(--dot-open); }
+
+.drone-volume-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.drone-volume-label input[type="range"] {
+  width: 72px;
 }

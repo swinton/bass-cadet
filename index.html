@@ -23,6 +23,17 @@
         <button class="btn pattern-btn"        data-pattern="descending" aria-pressed="false">Descending</button>
         <button class="btn pattern-btn active" data-pattern="both"       aria-pressed="true">Both</button>
       </div>
+      <div class="drone-control">
+        <div class="drone-toggle" role="group" aria-label="Drone">
+          <button class="btn drone-btn active" data-drone="off"   aria-pressed="true">Drone: Off</button>
+          <button class="btn drone-btn"        data-drone="root"  aria-pressed="false">Root</button>
+          <button class="btn drone-btn"        data-drone="fifth" aria-pressed="false">Root + 5th</button>
+        </div>
+        <label class="drone-volume-label">
+          <span>Vol</span>
+          <input type="range" id="drone-volume" min="0" max="100" value="30" aria-label="Drone volume" />
+        </label>
+      </div>
     </section>
 
     <section class="board-wrap">

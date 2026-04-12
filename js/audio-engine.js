@@ -38,6 +38,8 @@ export class AudioEngine {
     this._scheduleInterval = 25;  // milliseconds
     this._isMuted = false;
     this._onBeat = null; // called (beatTime, beatDuration) for each scheduled beat
+    this._droneGain = null;
+    this._droneOscillators = [];
   }
 
   get isMuted()  { return this._isMuted; }
@@ -137,6 +139,61 @@ export class AudioEngine {
     sub.start(now);
     saw.stop(end);
     sub.stop(end);
+  }
+
+  // --- Drone ---
+
+  /**
+   * Start a sustained drone on the given frequencies (Hz array).
+   * volume: 0–1 master gain for the drone (default 0.15).
+   * Fades in over 400ms to avoid a click on start.
+   */
+  startDrone(frequencies, volume = 0.15) {
+    this._ensureContext();
+    this._clearDroneImmediate(); // kill any existing drone before starting new one
+    const ctx = this._context;
+    const masterGain = ctx.createGain();
+    masterGain.gain.setValueAtTime(0, ctx.currentTime);
+    masterGain.gain.linearRampToValueAtTime(volume, ctx.currentTime + 0.4);
+    masterGain.connect(ctx.destination);
+    this._droneGain = masterGain;
+    this._droneOscillators = frequencies.map(freq => {
+      const osc = ctx.createOscillator();
+      osc.type = "triangle"; // softer harmonic content than sawtooth
+      osc.frequency.value = freq;
+      osc.connect(masterGain);
+      osc.start();
+      return osc;
+    });
+  }
+
+  /**
+   * Stop the drone with a short fade-out (400ms) to avoid a click on release.
+   */
+  stopDrone() {
+    if (!this._droneGain) return;
+    const ctx = this._context;
+    const gain = this._droneGain;
+    const oscs = this._droneOscillators;
+    gain.gain.setValueAtTime(gain.gain.value, ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.4);
+    // Stop oscillators after the fade completes so no click
+    setTimeout(() => oscs.forEach(o => { try { o.stop(); } catch (_) {} }), 450);
+    this._droneGain = null;
+    this._droneOscillators = [];
+  }
+
+  /** Smoothly ramp the drone master gain to a new volume (0–1). */
+  setDroneVolume(volume) {
+    if (!this._droneGain) return;
+    this._droneGain.gain.setTargetAtTime(volume, this._context.currentTime, 0.05);
+  }
+
+  /** Kill drone immediately (used internally before starting a new drone). */
+  _clearDroneImmediate() {
+    this._droneOscillators.forEach(o => { try { o.stop(); } catch (_) {} });
+    this._droneGain = null;
+    this._droneOscillators = [];
   }
 
   // --- Mute ---
