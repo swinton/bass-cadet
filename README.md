@@ -1,5 +1,7 @@
 # Bass Scale Practice
 
+**Live:** https://swinton.github.io/bass-practitioner/
+
 A single-page web app for practicing bass guitar scales visually.
 
 The fretboard displays one scale shape at a time, highlighting notes in sequence as you play along. No frameworks, no build step — plain HTML, CSS, and JavaScript.
