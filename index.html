@@ -17,10 +17,11 @@
       <div class="chip" id="shape-label">Shape 1</div>
       <button class="btn">Next ▶</button>
       <button class="btn play" id="play-btn">▶ Play</button>
-      <select id="pattern-select" aria-label="Playback pattern">
-        <option value="ascending">Ascending</option>
-        <option value="descending">Descending</option>
-      </select>
+      <div class="pattern-toggle" role="group" aria-label="Playback pattern">
+        <button class="btn pattern-btn active" data-pattern="ascending"  aria-pressed="true">Ascending</button>
+        <button class="btn pattern-btn"        data-pattern="descending" aria-pressed="false">Descending</button>
+        <button class="btn pattern-btn"        data-pattern="both"       aria-pressed="false">Both</button>
+      </div>
     </section>
 
     <section class="board-wrap">

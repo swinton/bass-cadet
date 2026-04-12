@@ -38,7 +38,9 @@ export class LessonPlayer {
   }
 
   setPlaybackPattern(name) {
-    if (!this.lesson?.playbackPatterns?.[name]) return;
+    const valid = ["ascending", "descending", "both"];
+    if (!valid.includes(name)) return;
+    if (name !== "both" && !this.lesson?.playbackPatterns?.[name]) return;
     this.state.playbackPattern = name;
     this.state.activeStepIndex = -1;
     this.renderer.clearActiveNote();
@@ -105,6 +107,11 @@ export class LessonPlayer {
   }
 
   getCurrentSequence() {
+    if (this.state.playbackPattern === "both") {
+      const asc  = this.lesson?.playbackPatterns?.ascending  ?? [];
+      const desc = this.lesson?.playbackPatterns?.descending ?? [];
+      return asc.length && desc.length ? [...asc, ...desc.slice(1)] : asc;
+    }
     return this.lesson?.playbackPatterns?.[this.state.playbackPattern] ?? [];
   }
 

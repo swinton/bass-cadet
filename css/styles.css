@@ -204,9 +204,31 @@ svg {
   }
 }
 
+.pattern-toggle {
+  display: flex;
+  gap: 0;
+}
+
+.pattern-toggle .pattern-btn {
+  border-radius: 0;
+  border-right-width: 1px;
+  min-width: 0;
+  padding: 10px 12px;
+}
+
+.pattern-toggle .pattern-btn:first-child { border-radius: 999px 0 0 999px; }
+.pattern-toggle .pattern-btn:last-child  { border-radius: 0 999px 999px 0; border-right-width: 2px; }
+.pattern-toggle .pattern-btn.active      { background: var(--ink); color: var(--dot-open); }
+
+@media (max-width: 900px) {
+  .pattern-toggle { grid-column: 1 / -1; }
+}
+
 @media (max-width: 640px) {
   body { padding: 16px; }
   .board-wrap { padding: 14px; border-radius: 20px; }
-  .btn, .chip, select { width: 100%; }
+  .btn, .chip { width: 100%; }
   .topbar { grid-template-columns: 1fr; }
+  .pattern-toggle { width: 100%; }
+  .pattern-toggle .pattern-btn { flex: 1; }
 }
