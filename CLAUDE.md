@@ -114,7 +114,7 @@ to the schema unless they represent genuinely distinct musical sequences.
 ## Suggested Folder Structure
 
 ```text
-bass-practitioner/
+bass-cadet/
   index.html
   lesson-schema.tsp
   data/

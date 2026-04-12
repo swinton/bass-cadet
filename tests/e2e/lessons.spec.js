@@ -108,5 +108,5 @@ test("browser back returns to the previous lesson", async ({ page }) => {
 
 test("page title includes the app name", async ({ page }) => {
   await page.goto("/");
-  await expect(page).toHaveTitle(/Bass Practitioner/);
+  await expect(page).toHaveTitle(/Bass Cadet/);
 });

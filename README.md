@@ -1,4 +1,4 @@
-# 👩‍🎤 Bass Practitioner
+# 🎸 Bass Cadet
 
 **Live:** https://swinton.github.io/bass-practitioner/
 

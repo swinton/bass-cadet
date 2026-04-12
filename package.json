@@ -1,5 +1,5 @@
 {
-  "name": "bass-practitioner",
+  "name": "bass-cadet",
   "private": true,
   "scripts": {
     "validate": "node scripts/validate-lessons.js",
