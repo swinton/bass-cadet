@@ -42,7 +42,19 @@ for (const file of lessonFiles) {
   const data = JSON.parse(readFileSync(filePath, "utf8"));
 
   if (validate(data)) {
-    console.log(`  ✓  ${filePath}`);
+    // Extra check: every ID referenced in playbackPatterns must exist in visibleNotes
+    const noteIds = new Set((data.visibleNotes || []).map((n) => n.id));
+    const patternRefs = Object.values(data.playbackPatterns || {}).flat();
+    const unknown = patternRefs.filter((id) => !noteIds.has(id));
+    if (unknown.length > 0) {
+      console.error(`  ✗  ${filePath}`);
+      console.error(
+        `       playbackPatterns references unknown note IDs: ${[...new Set(unknown)].join(", ")}`
+      );
+      failed++;
+    } else {
+      console.log(`  ✓  ${filePath}`);
+    }
   } else {
     console.error(`  ✗  ${filePath}`);
     for (const err of validate.errors) {
