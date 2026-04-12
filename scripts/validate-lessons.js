@@ -25,7 +25,9 @@ const Ajv = require("ajv/dist/2020");
 const ajv = new Ajv({ strict: false });
 const validate = ajv.compile(schema);
 
-const lessonFiles = readdirSync("data").filter((f) => f.endsWith(".json"));
+const lessonFiles = readdirSync("data").filter(
+  (f) => f.endsWith(".json") && f !== "lessons.json"
+);
 
 if (lessonFiles.length === 0) {
   console.error("No lesson JSON files found in data/");
