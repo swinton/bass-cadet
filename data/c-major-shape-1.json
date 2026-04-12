@@ -1,0 +1,38 @@
+{
+  "id": "c-major-shape-1",
+  "title": "C Major",
+  "subtitle": "Shape 1",
+  "instrument": {
+    "type": "bass",
+    "strings": 4,
+    "tuning": ["E", "A", "D", "G"]
+  },
+  "layout": {
+    "startFret": 2,
+    "fretCount": 4,
+    "showFretLabels": true,
+    "fretMarkers": [3, 5]
+  },
+  "defaults": {
+    "tempo": 80,
+    "loop": true,
+    "playbackPattern": "ascending"
+  },
+  "visibleNotes": [
+    { "id": "n1",  "string": 1, "fret": 2, "note": "A", "degree": 6, "role": "scale" },
+    { "id": "n2",  "string": 2, "fret": 2, "note": "E", "degree": 3, "role": "scale" },
+    { "id": "n3",  "string": 3, "fret": 2, "note": "B", "degree": 7, "role": "scale" },
+    { "id": "n4",  "string": 3, "fret": 3, "note": "C", "degree": 1, "role": "root"  },
+    { "id": "n5",  "string": 2, "fret": 3, "note": "F", "degree": 4, "role": "scale" },
+    { "id": "n6",  "string": 4, "fret": 3, "note": "G", "degree": 5, "role": "scale" },
+    { "id": "n7",  "string": 1, "fret": 4, "note": "B", "degree": 7, "role": "scale" },
+    { "id": "n8",  "string": 1, "fret": 5, "note": "C", "degree": 1, "role": "root"  },
+    { "id": "n9",  "string": 2, "fret": 5, "note": "G", "degree": 5, "role": "scale" },
+    { "id": "n10", "string": 3, "fret": 5, "note": "D", "degree": 2, "role": "scale" },
+    { "id": "n11", "string": 4, "fret": 5, "note": "A", "degree": 6, "role": "scale" }
+  ],
+  "playbackPatterns": {
+    "ascending":  ["n6", "n11", "n3", "n4", "n10", "n2", "n5", "n9", "n1", "n7", "n8"],
+    "descending": ["n8", "n7", "n1", "n9", "n5", "n2", "n10", "n4", "n3", "n11", "n6"]
+  }
+}
