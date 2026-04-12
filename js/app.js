@@ -14,6 +14,10 @@ function lessonIdFromUrl(registry) {
   return (param && registry.includes(param)) ? param : registry[0];
 }
 
+function labelFromId(id) {
+  return id.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+}
+
 function main() {
   const titleEl = document.querySelector("#title");
   const subtitleEl = document.querySelector("#subtitle");
@@ -28,6 +32,7 @@ function main() {
   const tempoInput = document.querySelector("#tempo");
   const tempoValue = document.querySelector("#tempo-value");
   const activeNoteLabel = document.querySelector("#active-note-label");
+  const lessonSelect = document.querySelector("#lesson-select");
 
   const renderer = new FretboardRenderer({ svgEl, labelsEl });
   const audioEngine = new AudioEngine();
@@ -64,6 +69,7 @@ function main() {
     const idx = registry.indexOf(id);
     prevBtn.disabled = idx <= 0;
     nextBtn.disabled = idx >= registry.length - 1;
+    lessonSelect.value = id;
   }
 
   function navigateToLesson(id) {
@@ -123,9 +129,18 @@ function main() {
     }
   });
 
+  lessonSelect.addEventListener("change", () => navigateToLesson(lessonSelect.value));
+
   loadRegistry()
     .then(reg => {
       registry = reg;
+      // Populate the dropdown
+      registry.forEach(id => {
+        const opt = document.createElement("option");
+        opt.value = id;
+        opt.textContent = labelFromId(id);
+        lessonSelect.appendChild(opt);
+      });
       const id = lessonIdFromUrl(registry);
       updateNav(id);
       return loadLesson(`./data/${id}.json`);

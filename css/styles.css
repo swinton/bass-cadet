@@ -110,6 +110,16 @@ body {
   gap: 8px;
 }
 
+.lesson-select-item select {
+  border: 1.5px solid var(--ink);
+  background: #faf7f1;
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+
 .swatch {
   width: 18px;
   height: 18px;

@@ -33,7 +33,11 @@
         <div class="legend-item"><span class="swatch"></span> Scale tone</div>
         <div class="legend-item"><span class="swatch open"></span> Root (C)</div>
         <div class="legend-item"><span class="swatch ghost"></span> Position marker</div>
-        <div class="legend-item" style="margin-left:auto; color: var(--muted); font-size:0.92rem;">
+        <div class="legend-item lesson-select-item" style="margin-left:auto; color: var(--muted); font-size:0.92rem;">
+          <label for="lesson-select">Lesson</label>
+          <select id="lesson-select"></select>
+        </div>
+        <div class="legend-item" style="color: var(--muted); font-size:0.92rem;">
           <label for="tempo" style="margin-right:6px;">Tempo</label>
           <input id="tempo" type="range" min="40" max="200" value="80" style="vertical-align:middle;" />
           <span id="tempo-value" style="margin-left:6px; font-weight:600;">80 BPM</span>
