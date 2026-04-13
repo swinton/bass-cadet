@@ -1,6 +1,6 @@
 # 🎸 Bass Cadet
 
-**Live:** https://swinton.github.io/bass-practitioner/
+**Live:** https://swinton.github.io/bass-cadet/
 
 A single-page web app for practicing bass guitar scales visually.
 
@@ -32,11 +32,11 @@ Then open `http://localhost:8080`.
 
 | Lesson | Direct link |
 |---|---|
-| C Major — Shape 1 | [?lesson=c-major-shape-1](https://swinton.github.io/bass-practitioner/?lesson=c-major-shape-1) |
-| C Major Pentatonic — Shape 1 | [?lesson=c-major-pentatonic-shape-1](https://swinton.github.io/bass-practitioner/?lesson=c-major-pentatonic-shape-1) |
-| A Minor Pentatonic — Position 1 | [?lesson=a-minor-pentatonic-position-1](https://swinton.github.io/bass-practitioner/?lesson=a-minor-pentatonic-position-1) |
-| C Major Arpeggio | [?lesson=c-major-arpeggio](https://swinton.github.io/bass-practitioner/?lesson=c-major-arpeggio) |
-| C Major Seventh Arpeggio | [?lesson=c-major-seventh-arpeggio](https://swinton.github.io/bass-practitioner/?lesson=c-major-seventh-arpeggio) |
+| C Major — Shape 1 | [?lesson=c-major-shape-1](https://swinton.github.io/bass-cadet/?lesson=c-major-shape-1) |
+| C Major Pentatonic — Shape 1 | [?lesson=c-major-pentatonic-shape-1](https://swinton.github.io/bass-cadet/?lesson=c-major-pentatonic-shape-1) |
+| A Minor Pentatonic — Position 1 | [?lesson=a-minor-pentatonic-position-1](https://swinton.github.io/bass-cadet/?lesson=a-minor-pentatonic-position-1) |
+| C Major Arpeggio | [?lesson=c-major-arpeggio](https://swinton.github.io/bass-cadet/?lesson=c-major-arpeggio) |
+| C Major Seventh Arpeggio | [?lesson=c-major-seventh-arpeggio](https://swinton.github.io/bass-cadet/?lesson=c-major-seventh-arpeggio) |
 
 ## Project structure
 
