@@ -26,6 +26,43 @@ The first MVP should focus on a single lesson only:
 * C Major
 * Shape 1
 
+---
+
+## Long-term Vision: CAGED-style system for bass
+
+The ultimate goal is a **CAGED-like system for bass** — a structured way to visualise
+and internalise scales across the entire neck, starting with C Major and extending to
+other scales and keys.
+
+There are two axes of navigation:
+
+### Vertical axis — positions up the neck
+
+The same scale pattern shifted to different fret positions (e.g. C Major Shape 1 at
+frets 2–5, Shape 2 at frets 5–8, Shape 3 at frets 7–10, etc.). Each shape covers the
+same notes/scale but uses a different fingering region. Moving through positions teaches
+the player how a single scale lives all over the neck.
+
+### Horizontal axis — modes in position
+
+Staying in the same fret region but moving to an adjacent scale shape — effectively
+rotating the starting degree — produces the modes. For example, starting the C Major
+pattern from D in the same position gives D Dorian; from E gives E Phrygian; and so on.
+This "horizontal" navigation builds a mental model of the modes as natural neighbours
+rather than abstract theory.
+
+### Design implications
+
+* Lessons need a `position` (fret region) and a `shape` (which degree the pattern
+  starts on) so the UI can offer both axes of navigation.
+* The Prev/Next controls already handle vertical navigation within a scale family.
+  A future "Mode" control (or second navigation row) will handle horizontal navigation.
+* The fretboard renderer must handle lessons at any fret position, not just frets 1–5.
+  Fret labels and neck position markers (dots at 3, 5, 7, 9, 12) must reflect the
+  actual fret numbers in the displayed window.
+* A `data/lessons.json` series structure (or separate series files) will group lessons
+  by scale family and key so the UI knows which lessons are neighbours on each axis.
+
 The overall design should resemble the attached reference image discussed earlier:
 
 * cream / beige background
@@ -499,16 +536,24 @@ What's shipped:
 
 ---
 
-## Future Ideas
+## Roadmap
 
-Possible future additions:
+### Near-term
+* Complete C Major shapes across all neck positions (vertical axis)
+* Renderer support for lessons beyond frets 1–5: fret labels showing actual fret
+  numbers, neck position markers (dots) at correct positions within the displayed window
+* Series metadata in `data/lessons.json` (or separate series files) to group lessons
+  by scale family, key, and axis so the UI can offer two-axis navigation
 
-* lessons beyond frets 1–5 (requires renderer support for scrollable/wider fretboard viewport)
-* additional keys and scale families
-* interval drills
-* finger suggestions
-* user preferences (default tempo, preferred playback mode)
-* alternate tunings (5-string, drop-D, etc.) — requires updating `OPEN_STRING_HZ` in audio engine
-* random practice mode
-* saved progress
-* eventual React migration if complexity grows
+### Medium-term
+* Horizontal axis navigation — move between modes in the same fret region
+* UI affordance for the two axes (e.g. a second Prev/Next row labelled "Mode")
+* Extend the system to other scale families (pentatonic, blues, etc.) and other keys
+
+### Later
+* Interval drills and ear training
+* Finger / position suggestions
+* User preferences (default tempo, preferred playback mode, saved progress)
+* Alternate tunings (5-string, drop-D) — requires updating `OPEN_STRING_HZ` in audio engine
+* Random practice mode
+* Eventual React migration if complexity grows
